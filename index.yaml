@@ -1,0 +1,14 @@
+apiVersion: v1
+entries:
+  wordpress:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2023-11-17T20:30:30.150391018Z"
+    description: A simple Helm chart for Wordpress
+    digest: 5216b1420d9a7adb8188881e794e07bf0da860b6cceb534c41864ca9d7a680ec
+    name: wordpress
+    type: application
+    urls:
+    - https://github.com/rezachalak/ArgoPress/releases/download/wordpress-0.1.0/wordpress-0.1.0.tgz
+    version: 0.1.0
+generated: "2023-11-17T20:30:30.150401027Z"
