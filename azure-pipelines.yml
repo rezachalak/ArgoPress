@@ -1,0 +1,90 @@
+trigger:
+  branches:
+    include:
+      - main 
+  paths:
+    include:
+      - ansible/*
+      - terraform/*
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+
+- checkout: self
+  persistCredentials: true
+
+- task: UsePythonVersion@0
+  displayName: 'Install Python'
+  inputs:
+    versionSpec: '3.6'
+
+- script: |
+    sudo apt-get update
+    sudo apt-get install -y python3-pip
+    
+  displayName: 'Install pip'
+
+- script: |
+    git clone https://github.com/kubernetes-sigs/kubespray.git
+    cd kubespray
+    sudo pip install -r requirements.txt
+    cp -rfp inventory/sample inventory/mycluster
+    cat <<EOF > inventory/mycluster/inventory.ini
+    [all]
+    node1 ansible_host=$machine_address ansible_user=$ssh_username ansible_ssh_pass=$ssh_password
+
+    [kube-master]
+    node1
+
+    [etcd]
+    node1
+
+    [kube-node]
+    node1
+
+    [calico-rr]
+
+    [k8s-cluster:children]
+    kube-master
+    kube-node
+    calico-rr
+    EOF
+
+    # Install Kubernetes cluster using Kubespray
+    ansible-playbook -i inventory/mycluster/inventory.ini cluster.yml -b --become-user=root
+    ansible node1 -i inventory/mycluster/inventory.ini -m fetch -a "src=/root/.kube/config dest=" -b --become-user=root
+    mv ./node1/root/.kube/config ../../kubeconfig
+  displayName: 'Install K8s with kubespray'
+  env:
+    machine_address: $(MACHINE_ADDRESS)
+    ssh_username: $(SSH_USERNAME)
+    ssh_password: $(SSH_PASSWORD)
+
+- task: UseTerraform@0
+  inputs:
+    version: '1.x'
+
+- script: |
+    echo "Setting up Terraform"
+    cd terraform
+    terraform init
+  displayName: 'Terraform Init'
+
+- script: |
+    echo "Validating Terraform configuration"
+    cd terraform
+    terraform validate
+  displayName: 'Terraform Validate'
+
+- script: |
+    echo "Applying Terraform"
+    cd terraform
+    terraform apply -var 'create_k8s_manifests=false' --auto-approve
+    terraform apply -var 'create_k8s_manifests=true' --auto-approve
+  displayName: 'Terraform Apply'
+  env:
+    ARM_SUBSCRIPTION_ID: $(ARM_SUBSCRIPTION_ID)
+    ARM_CLIENT_ID: $(ARM_CLIENT_ID)
+    ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
+    ARM_TENANT_ID: $(ARM_TENANT_ID)
