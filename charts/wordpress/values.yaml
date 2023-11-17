@@ -1,0 +1,83 @@
+# Default values for wordpress.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+wordpress:
+  replicaCount: 1
+  env:
+    WP_HOME: https://example.com/p/
+    WP_SITEURL: https://example.com/p/
+  image:
+    repository: wordpress
+    pullPolicy: IfNotPresent
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: "6.2.1-apache"
+  storageSize: 2Gi
+  storageClass: longhorn
+
+mysql:
+  image:
+    repository: mysql
+    pullPolicy: IfNotPresent
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: "8.0"
+  storageSize: 20Gi
+  storageClass: longhorn
+  rootPassword: wordpressssRoot
+  username: admin
+  password: "securePa$$word"
+
+phpmyadmin:
+  env:
+    PMA_ABSOLUTE_URI: https://example.com/pma/
+  image:
+    repository: phpmyadmin
+    pullPolicy: IfNotPresent
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: latest
+
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  className: ""
+  annotations: 
+    kubernetes.io/tls-acme: "true"
+    cert-manager.io/cluster-issuer: letsencrypt
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/use-regex: 'true'
+  hosts:
+    - host: example.com
+      paths:
+        - path: /pma(/|$)(.*)
+          pathType: ImplementationSpecific
+          service: wordpress-phpmyadmin
+          servicePort: 80
+        - path: /p(/|$)(.*)
+          pathType: ImplementationSpecific
+          service: wordpress
+          servicePort: 80
+  tls: 
+   - secretName: example-com-secret
+     hosts:
+       - example.com
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
