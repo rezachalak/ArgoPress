@@ -1,0 +1,8 @@
+argoUsername          = "admin"
+argoPassword          = "wNOgo7mvEpjVNJRh"
+argoNamespace         = "argo"
+argoServerAddr        = "kubernetes.default.svc:443"
+# helmAppsGitRepoUrl    = "https://github.com/rezachalak/ArgoPress.git"
+# helmAppsGitRepoBranch = "main"
+# helmBasePath          = "charts"
+destinationCluster = "https://kubernetes.default.svc"

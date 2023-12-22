@@ -41,7 +41,9 @@ EOF
 ansible-playbook -i inventory/mycluster/inventory.ini cluster.yml -b --become-user=root
 ansible node1 -i inventory/mycluster/inventory.ini -m fetch -a "src=/root/.kube/config dest=" -b --become-user=root
 mv ./node1/root/.kube/config ../kubeconfig
-cd ../terraform
+# Get out of kubespray dir
+cd ../terraform/
+# Apply the Terraform resources 
 terraform init
-terraform apply -var 'create_k8s_manifests=false' --auto-approve
+terraform apply -var 'create_k8s_manifests=false' --auto-approve # The prerequisit of k8s manifesets should be installed first
 terraform apply -var 'create_k8s_manifests=true' --auto-approve

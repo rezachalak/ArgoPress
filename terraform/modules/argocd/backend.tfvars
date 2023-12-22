@@ -1,0 +1,5 @@
+bucket               = "argopress-demo.tfstate"
+key                  = "argocd.json"
+region               = "eu-north-1"
+workspace_key_prefix = "environment"
+dynamodb_table       = "argopress-demo.tfstate.lock"

@@ -1,0 +1,3 @@
+[submodule "terraform/modules/argo_apps/modules/terraform-kubernetes-argocd-project"]
+        path = terraform/modules/argo_apps/modules/terraform-kubernetes-argocd-project
+        url = git@github.com:project-octal/terraform-kubernetes-argocd-project.git

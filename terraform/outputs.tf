@@ -1,4 +1,4 @@
-# output "website_addr" {
-#   value = "https://${aws_route53_record.tf.name}"
-# }
-
+output "argocd-password" {
+  value = data.kubernetes_secret.argo_password.data
+  sensitive = true
+}
